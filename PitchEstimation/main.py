@@ -57,36 +57,55 @@ def plot_signal(file_path):
     voice_end = 0
     unvoice_start = 0
     unvoice_end = 0
-    if file_path.split(".")[0] == "phone_F1":
-        voice_start = 0.53
-        voice_end += 0.56
-        unvoice_start = 1.14
-        unvoice_end += 1.17
-    elif file_path.split(".")[0] == "phone_M1":
-        voice_start = 0.46
-        voice_end += 0.49
-        unvoice_start = 1.39
-        unvoice_end += 1.42
-    elif file_path.split(".")[0] == "studio_F1":
-        unvoice_start = 0.68
-        unvoice_end = 0.7
-        voice_start = 1.10
-        voice_end = 1.13
+    file_mean = 0
+    file_std = 0
+    if (
+        file_path.split(".")[0]
+        == "/home/viethung/DSP/PitchEstimation/TinHieuKiemThu/phone_F1"
+    ):
+        voice_start = 2.66
+        voice_end = 2.69
+        unvoice_start = 2.73
+        unvoice_end = 2.75
+        file_mean = 217
+        file_std = 23
+    elif (
+        file_path.split(".")[0]
+        == "/home/viethung/DSP/PitchEstimation/TinHieuKiemThu/phone_M1"
+    ):
+        voice_start = 3.45
+        voice_end = 3.48
+        unvoice_start = 3.29
+        unvoice_end = 3.32
+        file_mean = 122
+        file_std = 18
+    elif (
+        file_path.split(".")[0]
+        == "/home/viethung/DSP/PitchEstimation/TinHieuKiemThu/studio_F1"
+    ):
+        unvoice_start = 1.86
+        unvoice_end = 1.89
+        voice_start = 1.92
+        voice_end = 1.95
+        file_mean = 232
+        file_std = 40
     else:
-        unvoice_start = 0.87
-        unvoice_end += 0.9
-        voice_start = 0.94
-        voice_end += 0.97
+        unvoice_start = 1.78
+        unvoice_end = 1.81
+        voice_start = 1.82
+        voice_end = 1.85
+        file_mean = 113
+        file_std = 26
     window_size = int(0.03 * fs)
     x = np.arange(0, signal.shape[0])
     threshold = 0.3
-    fig = plt.figure()
+    fig = plt.figure(file_path.split(".")[0])
     axs = fig.subplots(nrows=4)
     # plot the input signal
-    axs[3].plot(x, signal)
-    axs[3].set_xlabel("Sample Index")
-    axs[3].set_ylabel("Amplitude")
-
+    axs[0].plot(x, signal)
+    axs[0].set_xlabel("Sample Index")
+    axs[0].set_ylabel("Amplitude")
+    axs[0].set_title(f"Tin hieu dau vao voi F0mean = {file_mean} va F0std = {file_std}")
     # auto correlation function
     f0 = np.zeros(x.shape[0])
     start = 0
@@ -118,19 +137,29 @@ def plot_signal(file_path):
     res_mean = np.mean(np.array(points))
     res_std = np.std(np.array(points))
     # plot pitch contour
-    axs[2].scatter(x, f0)
+    axs[1].set_title(f"Mean = {res_mean}, Std = {res_std}")
+    axs[1].scatter(x, f0)
+    axs[1].set_ylabel("F0(Hz)")
+    axs[1].set_xlabel("Sample Index")
     # plot voice
     temp_window = signal[int(voice_start * fs) : int(voice_end * fs)]
     acf_value = auto_correlation_function(temp_window)
+    max_value = np.max(np.array(acf_value))
+    acf_value /= max_value
     for value in acf_value:
         voice.append(value)
-    axs[1].plot(np.arange(len(voice)), voice)
+    axs[2].plot(np.arange(len(voice)), voice)
+    axs[2].set_title("Ham tu tuong quan cua am huu thanh tren 1 khung")
     # plot unvoice
     second_temp_window = signal[int(unvoice_start * fs) : int(unvoice_end * fs)]
     second_acf_value = auto_correlation_function(second_temp_window)
+    second_max_value = np.max(np.array(second_acf_value))
+    second_acf_value /= second_max_value
     for value in second_acf_value:
         unvoice.append(value)
-    axs[0].plot(np.arange(len(unvoice)), unvoice)
+    axs[3].plot(np.arange(len(unvoice)), unvoice)
+    axs[3].set_title("Ham tu tuong quan cua am vo thanh tren 1 khung")
+    fig.tight_layout()
 
 
 if __name__ == "__main__":
