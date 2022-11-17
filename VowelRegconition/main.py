@@ -1,6 +1,7 @@
 from scipy.io import wavfile
 import numpy as np
 import matplotlib.pyplot as plt
+import librosa
 
 
 def short_term_energy(frame):
