@@ -2,6 +2,9 @@ from scipy.io import wavfile
 import numpy as np
 import matplotlib.pyplot as plt
 import librosa
+import os
+
+SAMPLE_DIR = r"/home/viethung/DSP/VowelRegconition/NguyenAmHuanLuyen-16k"
 
 
 def short_term_energy(frame):
@@ -30,7 +33,33 @@ def voice_segment(file_path, frame_size, threshold, attribute_function):
     return value
 
 
+def iterator_for_all_sub_directories(directory):
+    files_path = {"a.wav": [], "e.wav": [], "i.wav": [], "o.wav": [], "u.wav": []}
+    for sub_directory in os.scandir(directory):
+        for file in os.scandir(sub_directory):
+            splitted_file_path = file.path.split("/")
+            files_path[splitted_file_path[-1]].append(file.path)
+    return files_path
+
+
+def fft(middle_frames, frame_size, n_fft):
+    result = []
+    start = 0
+    end = frame_size
+    while end < middle_frames.shape[0]:
+        temp_frame = middle_frames[start:end]
+        result.append(librosa.sfft(temp_frame, n_fft))
+        start += frame_size
+        end += frame_size
+    if end < middle_frames.shape[0]:
+        temp_frame = middle_frames[end : middle_frames.shape[0]]
+        result.append(librosa.sfft(temp_frame, n_fft))
+    return np.mean(result)
+
+
 if __name__ == "__main__":
 
-    file_path = "/home/viethung/DSP/VowelRegconition/NguyenAmHuanLuyen-16k/01MDA/a.wav"
-    print(voice_segment(file_path, 0.03, 0, "zero_crossing_rate"))
+    all_directories = iterator_for_all_sub_directories(SAMPLE_DIR)
+    for directory in all_directories:
+        for value in all_directories[directory]:
+            print(value)
