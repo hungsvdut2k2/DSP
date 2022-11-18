@@ -48,18 +48,33 @@ def fft(middle_frames, frame_size, n_fft):
     end = frame_size
     while end < middle_frames.shape[0]:
         temp_frame = middle_frames[start:end]
-        result.append(librosa.sfft(temp_frame, n_fft))
+        result.append(librosa.stft(temp_frame, n_fft))
         start += frame_size
         end += frame_size
     if end < middle_frames.shape[0]:
         temp_frame = middle_frames[end : middle_frames.shape[0]]
-        result.append(librosa.sfft(temp_frame, n_fft))
+        result.append(librosa.stft(temp_frame, n_fft))
     return np.mean(result)
 
 
-if __name__ == "__main__":
-
-    all_directories = iterator_for_all_sub_directories(SAMPLE_DIR)
+def features_extraction(directory):
+    all_directories = iterator_for_all_sub_directories(directory)
+    result = {"a.wav": [], "e.wav": [], "i.wav": [], "o.wav": [], "u.wav": []}
     for directory in all_directories:
         for value in all_directories[directory]:
-            print(value)
+            sample_rate, signal = wavfile.read(value)
+            frame_size = int(0.03 * sample_rate)
+            result[value.split("/")[-1]].append(fft(signal, frame_size, 512))
+    return result
+
+
+def euclidean_distance(first_vector, second_vector):
+    return np.sum((first_vector - second_vector) ** 2)
+
+
+if __name__ == "__main__":
+    sample_rate, signal = wavfile.read(
+        "/home/viethung/DSP/VowelRegconition/NguyenAmHuanLuyen-16k/01MDA/a.wav"
+    )
+    frame_size = int(0.03 * sample_rate)
+    print(librosa.stft(np.float64(signal)))
