@@ -20,17 +20,37 @@ def zero_crossing_rate(frame):
 
 
 def voice_segment(file_path, frame_size, threshold, attribute_function):
+    voice = []
+    ste_values = []
+    result = []
     sample_rate, signal = wavfile.read(file_path)
     frame_size = int(frame_size * sample_rate)
     start = 0
     end = frame_size
-    value = []
     while end < signal.shape[0]:
+        temp_list = []
         temp_frame = np.float64(signal[start:end])
-        value.append(eval(f"{attribute_function}(temp_frame)"))
+        value = eval(f"{attribute_function}(temp_frame)")
+        ste_values.append(value)
+        temp_list.append(value)
+        temp_list.append(temp_frame)
+        voice.append(temp_list)
         start += frame_size
         end += frame_size
-    return value
+    for sublist in voice:
+        sublist[0] /= max(ste_values)
+    for sublist in voice:
+        if sublist[0] >= 0.01:
+            for value in sublist[1]:
+                result.append(value)
+    return result
+
+
+def get_middle_frame(frame):
+    frame_size = len(frame) / 3
+    start = int(frame_size)
+    end = int(2 * frame_size)
+    return frame[start:end]
 
 
 def iterator_for_all_sub_directories(directory):
@@ -73,8 +93,8 @@ def euclidean_distance(first_vector, second_vector):
 
 
 if __name__ == "__main__":
-    sample_rate, signal = wavfile.read(
-        "/home/viethung/DSP/VowelRegconition/NguyenAmHuanLuyen-16k/01MDA/a.wav"
-    )
-    frame_size = int(0.03 * sample_rate)
-    print(librosa.stft(np.float64(signal)))
+    file_path = "/home/viethung/DSP/VowelRegconition/NguyenAmHuanLuyen-16k/01MDA/a.wav"
+    result = voice_segment(file_path, 0.03, 0.01, "short_term_energy")
+    print(len(result))
+    other_result = get_middle_frame(result)
+    print(len(other_result))
