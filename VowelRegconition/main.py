@@ -45,12 +45,11 @@ def voice_segment(file_path, frame_size, threshold, attribute_function):
                 result.append(value)
     return result
 
-
-def get_middle_frame(frame):
-    frame_size = len(frame) / 3
-    start = int(frame_size)
-    end = int(2 * frame_size)
-    return frame[start:end]
+    def get_middle_frame(frame):
+        frame_size = len(frame) / 3
+        start = int(frame_size)
+        end = int(2 * frame_size)
+        return frame[start:end]
 
 
 def iterator_for_all_sub_directories(directory):
@@ -97,4 +96,3 @@ if __name__ == "__main__":
     result = voice_segment(file_path, 0.03, 0.01, "short_term_energy")
     print(len(result))
     other_result = get_middle_frame(result)
-    print(len(other_result))

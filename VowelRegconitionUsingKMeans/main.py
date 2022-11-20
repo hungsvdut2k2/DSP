@@ -34,4 +34,7 @@ def mfcc(middle_frame, sample_rate):
 
 
 if __name__ == "__main__":
-    print("Hello World")
+    sample_rate, signal = wavfile.read(
+        "/home/viethung/DSP/VowelRegconition/NguyenAmHuanLuyen-16k/01MDA/a.wav"
+    )
+    print(librosa.feature.mfcc(y=signal, sr=sample_rate, n_mfcc=13))
